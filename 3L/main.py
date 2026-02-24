@@ -22,12 +22,6 @@ rcParams['legend.edgecolor'] = 'k'
 rcParams['axes.linewidth'] = 0.5
 rcParams['lines.linewidth'] = 1.0
 
-def omega_model(l, A, B):
-    return (A / l) * (0.5 + B / l)**(-0.5)
-
-def zeta_model(l, C, B):
-    return C * l * (0.5 + B / l)**0.5
-
 def analyze_data(file_path):
     df = pd.read_csv(file_path, skiprows=5, usecols=[0, 1])
     t = df['Time'].values
@@ -53,8 +47,8 @@ def analyze_data(file_path):
     ax1.plot(t_trim, v_trim)
     ax2.plot(w, F)
 
-    ax1.set_xlabel(r"Time ($s$)", fontsize=15)
-    ax1.set_ylabel(r"Voltage ($V$)", fontsize=15)
+    ax1.set_xlabel(r"Time (s)", fontsize=15)
+    ax1.set_ylabel(r"Voltage (V)", fontsize=15)
 
     ax2.set_xlim([-500, 500])
     ax2.set_xticks(np.arange(-500, 501, 100))
@@ -69,7 +63,7 @@ def analyze_data(file_path):
 
     ax2.plot(peak_freqs[1], peak_powers[1], "x", color='red', label=f'Sensor Peak ({peak_freqs[1]:.0f} hz)', markersize=8, markeredgewidth=2)
     ax2.plot(peak_freqs[2], peak_powers[2], "x", color='green', label=f'Hose Peak ({peak_freqs[2]:.0f} hz)', markersize=8, markeredgewidth=2)
-    ax2.set_xlabel(r"Frequency ($hz$)", fontsize=15)
+    ax2.set_xlabel(r"Frequency (hz)", fontsize=15)
     ax2.set_ylabel(r"$| \widehat{V}(\omega) |^2$", fontsize=15)
     ax2.legend()
 
@@ -78,47 +72,49 @@ def analyze_data(file_path):
     fig.tight_layout()
 
 def plot_omega_zeta(lengths, w_balloon, w_valve, z_balloon, z_valve):
-    l_all = np.concatenate((lengths, lengths))
-    w_all = np.concatenate((w_balloon, w_valve))
-    z_all = np.concatenate((z_balloon, z_valve))
+    C = 343.0
+    RHO = 1.225 
+    MU = 1.81e-5
+    D = 0.005
+    V = 6.5548256e-8
     
-    mask_w = ~np.isnan(w_all)
-    mask_z = ~np.isnan(z_all)
+    lengths_array = np.linspace(min(lengths), max(lengths), 100)
     
-    l_valid_w = l_all[mask_w]
-    w_valid = w_all[mask_w]
+    V_t = (np.pi * D**2 / 4) * lengths_array
     
-    l_valid_z = l_all[mask_z]
-    z_valid = z_all[mask_z]
+    w_theoretical = (C / lengths_array) * (0.5 + V / V_t)**(-0.5)
+    z_theoretical = ((16 * MU * lengths_array) / (RHO * C * D**2)) * (0.5 + V / V_t)**0.5
+
+    mask_w_valv = ~np.isnan(w_valve)
+    mask_z_valv = ~np.isnan(z_valve)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-    fig.suptitle("Deliverable 4: Dynamic Characteristics vs. Tube Length", fontweight='bold')
+    fig.suptitle("Deliverable 4", fontweight='bold')
     
     ax1.plot(lengths, w_balloon, 'bo', label='Balloon Data')
-    ax1.plot(lengths, w_valve, 'ro', label='Valve Data')
+    ax1.plot(lengths[mask_w_valv], w_valve[mask_w_valv], 'ro', label='Valve Data')
+    ax1.plot(lengths_array, w_theoretical, 'k-', label='Theoretical Model (Eq. 4a)')
     
-    ax1.set_xlabel("Tube Length, $l$ (m)")
-    ax1.set_ylabel(r"Natural Frequency, $\omega$ (rad/s)")
-    ax1.grid(True, linestyle='--', alpha=0.6)
+    ax1.set_xlabel("Tube Length (m)")
+    ax1.set_ylabel(r"$\omega$ (rad/s)")
     ax1.legend()
     
     ax2.plot(lengths, z_balloon, 'bo', label='Balloon Data')
-    ax2.plot(lengths, z_valve, 'ro', label='Valve Data')
+    ax2.plot(lengths[mask_z_valv], z_valve[mask_z_valv], 'ro', label='Valve Data')
+    ax2.plot(lengths_array, z_theoretical, 'k-', label='Theoretical Model (Eq. 4b)')
     
-    ax2.set_xlabel("Tube Length, $l$ (m)")
-    ax2.set_ylabel(r"Damping Ratio, $\zeta$")
-    ax2.grid(True, linestyle='--', alpha=0.6)
+    ax2.set_xlabel("Tube Length (m)")
+    ax2.set_ylabel(r"$\zeta$")
     ax2.legend()
     
     plt.tight_layout()
-    plt.show()
 
 if __name__ == "__main__":
     analyze_data("./Short/ShortBalloonOscilloscopeData.csv")
     analyze_data("./Medium/MediumBalloonOscilloscopeData.csv")
     analyze_data("./Long/LongBalloonOscilloscopeData.csv")
 
-    lengths_measured = np.array([0.1, 0.5, 1.0])
+    lengths_measured = np.array([0.1524, 0.635, 1.016])
     w_ball = np.array([1811.4, 679.3, 452.8])
     w_valv = np.array([np.nan, 708.31, 463.11])
     z_ball = np.array([0.0450, 0.0500, 0.0650])
