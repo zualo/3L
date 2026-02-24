@@ -94,7 +94,6 @@ def plot_omega_zeta(lengths, w_balloon, w_valve, z_balloon, z_valve):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
     fig.suptitle("Deliverable 4: Dynamic Characteristics vs. Tube Length", fontweight='bold')
     
-    # 3. Plot Omega (Natural Frequency)
     ax1.plot(lengths, w_balloon, 'bo', label='Balloon Data')
     ax1.plot(lengths, w_valve, 'ro', label='Valve Data')
     
@@ -114,16 +113,15 @@ def plot_omega_zeta(lengths, w_balloon, w_valve, z_balloon, z_valve):
     plt.tight_layout()
     plt.show()
 
-
 if __name__ == "__main__":
     analyze_data("./Short/ShortBalloonOscilloscopeData.csv")
     analyze_data("./Medium/MediumBalloonOscilloscopeData.csv")
     analyze_data("./Long/LongBalloonOscilloscopeData.csv")
 
     lengths_measured = np.array([0.1, 0.5, 1.0])
-    w_ball = np.array([100.0, 50.0, 25.0])
-    w_valv = np.array([105.0, 52.0, 26.0])
-    z_ball = np.array([np.nan, 708.31, 463.11])
+    w_ball = np.array([1811.4, 679.3, 452.8])
+    w_valv = np.array([np.nan, 708.31, 463.11])
+    z_ball = np.array([0.0450, 0.0500, 0.0650])
     z_valv = np.array([np.nan, 0.051, 0.081])
     plot_omega_zeta(lengths_measured, w_ball, w_valv, z_ball, z_valv)
 
