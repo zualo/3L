@@ -33,7 +33,9 @@ def analyze_data(file_path):
     v_trim = v[mask]
 
     dt = t[1] - t[0]
+    print(f"dt: {dt}")
     n = len(t_trim)
+    print(f"Number of data points: {n}")
 
     F = fft.ifft(v_trim)
     w = fft.fftfreq(n, d=dt)
@@ -43,15 +45,16 @@ def analyze_data(file_path):
 
     F = np.abs(F)**2
 
-    fig, (ax1, ax2) = plt.subplots(2, 1)
-    ax1.plot(t_trim, v_trim)
-    ax2.plot(w, F)
+    plt.figure()
+    
+    plt.plot(t_trim, v_trim)
+    plt.xlabel(r"Time (s)", fontsize=15)
+    plt.ylabel(r"Voltage (V)", fontsize=15)
 
-    ax1.set_xlabel(r"Time (s)", fontsize=15)
-    ax1.set_ylabel(r"Voltage (V)", fontsize=15)
-
-    ax2.set_xlim([-500, 500])
-    ax2.set_xticks(np.arange(-500, 501, 100))
+    plt.figure()
+    plt.plot(w, F)
+    plt.xlim([-500, 500])
+    plt.xticks(np.arange(-500, 501, 100))
 
     w_vis = (w >= -500) & (w <= 500)
     F_vis = F[w_vis]
@@ -61,15 +64,13 @@ def analyze_data(file_path):
     peak_freqs = w[w_vis][peaks]
     peak_powers = F_vis[peaks]
 
-    ax2.plot(peak_freqs[1], peak_powers[1], "x", color='red', label=f'Sensor Peak ({peak_freqs[1]:.0f} hz)', markersize=8, markeredgewidth=2)
-    ax2.plot(peak_freqs[2], peak_powers[2], "x", color='green', label=f'Hose Peak ({peak_freqs[2]:.0f} hz)', markersize=8, markeredgewidth=2)
-    ax2.set_xlabel(r"Frequency (hz)", fontsize=15)
-    ax2.set_ylabel(r"$| \widehat{V}(\omega) |^2$", fontsize=15)
-    ax2.legend()
+    plt.plot(peak_freqs[1], peak_powers[1], "x", color='red', label=f'Sensor Peak ({peak_freqs[1]:.0f} hz)', markersize=8, markeredgewidth=2)
+    plt.plot(peak_freqs[2], peak_powers[2], "x", color='green', label=f'Hose Peak ({peak_freqs[2]:.0f} hz)', markersize=8, markeredgewidth=2)
+    plt.xlabel(r"Frequency (hz)", fontsize=15)
+    plt.ylabel(r"$| \widehat{V}(\omega) |^2$", fontsize=15)
 
-    title_part = file_path.split('/')[1]
-    fig.suptitle(f"{title_part} Tube Balloon Response", fontsize=18)
-    fig.tight_layout()
+    plt.legend()
+
 
 def plot_omega_zeta(lengths, w_balloon, w_valve, z_balloon, z_valve):
     C = 343.0
@@ -88,24 +89,27 @@ def plot_omega_zeta(lengths, w_balloon, w_valve, z_balloon, z_valve):
     mask_w_valv = ~np.isnan(w_valve)
     mask_z_valv = ~np.isnan(z_valve)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-    fig.suptitle("Deliverable 4", fontweight='bold')
+    plt.figure(figsize=(6.4, 4.8))
     
-    ax1.plot(lengths, w_balloon, 'bo', label='Balloon Data')
-    ax1.plot(lengths[mask_w_valv], w_valve[mask_w_valv], 'ro', label='Valve Data')
-    ax1.plot(lengths_array, w_theoretical, 'k-', label='Theoretical Model (Eq. 4a)')
+    plt.plot(lengths, w_balloon, 'bo', label='Balloon Data')
+    plt.plot(lengths[mask_w_valv], w_valve[mask_w_valv], 'ro', label='Valve Data')
+    plt.plot(lengths_array, w_theoretical, 'k-', label=r'$\omega = \omega(l)$')
     
-    ax1.set_xlabel("Tube Length (m)")
-    ax1.set_ylabel(r"$\omega$ (rad/s)")
-    ax1.legend()
+    plt.xlabel("Tube length (m)", fontsize=15)
+    plt.ylabel(r"Damped natural frequency, $\omega$ (rad/s)", fontsize=15)
+    plt.legend()
+
+    plt.tight_layout()
+
+    plt.figure(figsize=(6.4, 4.8))
     
-    ax2.plot(lengths, z_balloon, 'bo', label='Balloon Data')
-    ax2.plot(lengths[mask_z_valv], z_valve[mask_z_valv], 'ro', label='Valve Data')
-    ax2.plot(lengths_array, z_theoretical, 'k-', label='Theoretical Model (Eq. 4b)')
+    plt.plot(lengths, z_balloon, 'bo', label='Balloon Data')
+    plt.plot(lengths[mask_z_valv], z_valve[mask_z_valv], 'ro', label='Valve Data')
+    plt.plot(lengths_array, z_theoretical, 'k-', label=r'$\zeta = \zeta(l)$')
     
-    ax2.set_xlabel("Tube Length (m)")
-    ax2.set_ylabel(r"$\zeta$")
-    ax2.legend()
+    plt.xlabel("Tube length (m)", fontsize=15)
+    plt.ylabel(r"Damping ratio, $\zeta$", fontsize=15)
+    plt.legend()
     
     plt.tight_layout()
 
