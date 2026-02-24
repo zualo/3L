@@ -77,7 +77,7 @@ def analyze_data(file_path):
     fig.suptitle(f"{title_part} Tube Balloon Response", fontsize=18)
     fig.tight_layout()
 
-def deliverable(lengths, w_balloon, w_valve, z_balloon, z_valve):
+def plot_omega_zeta(lengths, w_balloon, w_valve, z_balloon, z_valve):
     l_all = np.concatenate((lengths, lengths))
     w_all = np.concatenate((w_balloon, w_valve))
     z_all = np.concatenate((z_balloon, z_valve))
@@ -90,14 +90,6 @@ def deliverable(lengths, w_balloon, w_valve, z_balloon, z_valve):
     
     l_valid_z = l_all[mask_z]
     z_valid = z_all[mask_z]
-    
-    l_smooth = np.linspace(min(lengths) * 0.8, max(lengths) * 1.2, 100)
-    
-    popt_w, _ = curve_fit(omega_model, l_valid_w, w_valid)
-    popt_z, _ = curve_fit(zeta_model, l_valid_z, z_valid)
-    
-    w_smooth = omega_model(l_smooth, *popt_w)
-    z_smooth = zeta_model(l_smooth, *popt_z)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
     fig.suptitle("Deliverable 4: Dynamic Characteristics vs. Tube Length", fontweight='bold')
@@ -106,9 +98,6 @@ def deliverable(lengths, w_balloon, w_valve, z_balloon, z_valve):
     ax1.plot(lengths, w_balloon, 'bo', label='Balloon Data')
     ax1.plot(lengths, w_valve, 'ro', label='Valve Data')
     
-    fit_label_w = f"Best Fit Eq 4a:\n$A={popt_w[0]:.2f}, B={popt_w[1]:.4f}$"
-    ax1.plot(l_smooth, w_smooth, 'k-', label=fit_label_w)
-    
     ax1.set_xlabel("Tube Length, $l$ (m)")
     ax1.set_ylabel(r"Natural Frequency, $\omega$ (rad/s)")
     ax1.grid(True, linestyle='--', alpha=0.6)
@@ -116,9 +105,6 @@ def deliverable(lengths, w_balloon, w_valve, z_balloon, z_valve):
     
     ax2.plot(lengths, z_balloon, 'bo', label='Balloon Data')
     ax2.plot(lengths, z_valve, 'ro', label='Valve Data')
-    
-    fit_label_z = f"Best Fit Eq 4b:\n$C={popt_z[0]:.2f}, B={popt_z[1]:.4f}$"
-    ax2.plot(l_smooth, z_smooth, 'k-', label=fit_label_z)
     
     ax2.set_xlabel("Tube Length, $l$ (m)")
     ax2.set_ylabel(r"Damping Ratio, $\zeta$")
@@ -139,6 +125,6 @@ if __name__ == "__main__":
     w_valv = np.array([105.0, 52.0, 26.0])
     z_ball = np.array([np.nan, 708.31, 463.11])
     z_valv = np.array([np.nan, 0.051, 0.081])
-    deliverable(lengths_measured, w_ball, w_valv, z_ball, z_valv)
+    plot_omega_zeta(lengths_measured, w_ball, w_valv, z_ball, z_valv)
 
     plt.show()
