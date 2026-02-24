@@ -37,6 +37,9 @@ def analyze_data(file_path):
     n = len(t_trim)
     print(f"Number of data points: {n}")
 
+    res = (2*np.pi)/(n*dt)
+    print(f"Frequency resolution: {res} ")
+
     F = fft.ifft(v_trim)
     w = fft.fftfreq(n, d=dt)
 
@@ -50,6 +53,8 @@ def analyze_data(file_path):
     plt.plot(t_trim, v_trim)
     plt.xlabel(r"Time (s)", fontsize=15)
     plt.ylabel(r"Voltage (V)", fontsize=15)
+
+    plt.tight_layout()
 
     plt.figure()
     plt.plot(w, F)
@@ -66,10 +71,12 @@ def analyze_data(file_path):
 
     plt.plot(peak_freqs[1], peak_powers[1], "x", color='red', label=f'Sensor Peak ({peak_freqs[1]:.0f} hz)', markersize=8, markeredgewidth=2)
     plt.plot(peak_freqs[2], peak_powers[2], "x", color='green', label=f'Hose Peak ({peak_freqs[2]:.0f} hz)', markersize=8, markeredgewidth=2)
-    plt.xlabel(r"Frequency (hz)", fontsize=15)
+    plt.xlabel(r"Frequency (Hz)", fontsize=15)
     plt.ylabel(r"$| \widehat{V}(\omega) |^2$", fontsize=15)
 
     plt.legend()
+
+    plt.tight_layout()
 
 
 def plot_omega_zeta(lengths, w_balloon, w_valve, z_balloon, z_valve):
